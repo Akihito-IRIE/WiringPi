@@ -319,8 +319,14 @@ int wiringPiTryGpioMem  = FALSE ;
 // sysFds:
 //	Map a file descriptor from the /sys/class/gpio/gpioX/value
 
-static int sysFds [64] =
+static int sysFds [160] =
 {
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -1425,7 +1431,7 @@ void pinModeAlt (int pin, int mode)
 
   setupCheck ("pinModeAlt") ;
 
-  if ((pin & PI_GPIO_MASK) == 0)		// On-board pin
+  if ((pin & PI_GPIO_MASK) == 0 || is_armadillo())		// On-board pin
   {
     /**/ if (wiringPiMode == WPI_MODE_PINS)
       pin = pinToGpio [pin] ;
@@ -1456,7 +1462,7 @@ void pinMode (int pin, int mode)
 
   setupCheck ("pinMode") ;
 
-  if ((pin & PI_GPIO_MASK) == 0)		// On-board pin
+  if ((pin & PI_GPIO_MASK) == 0 || is_armadillo())		// On-board pin
   {
     /**/ if (wiringPiMode == WPI_MODE_PINS)
       pin = pinToGpio [pin] ;
@@ -1535,7 +1541,7 @@ void pullUpDnControl (int pin, int pud)
 
   setupCheck ("pullUpDnControl") ;
 
-  if ((pin & PI_GPIO_MASK) == 0)		// On-Board Pin
+  if ((pin & PI_GPIO_MASK) == 0 || is_armadillo())		// On-Board Pin
   {
     /**/ if (wiringPiMode == WPI_MODE_PINS)
       pin = pinToGpio [pin] ;
@@ -1594,7 +1600,7 @@ int digitalRead (int pin)
 {
   char c ;
   struct wiringPiNodeStruct *node = wiringPiNodes ;
-  if ((pin & PI_GPIO_MASK) == 0)		// On-Board Pin
+  if ((pin & PI_GPIO_MASK) == 0 || is_armadillo())		// On-Board Pin
   {
     /**/ if (wiringPiMode == WPI_MODE_GPIO_SYS)	// Sys mode
     {
@@ -1635,7 +1641,7 @@ unsigned int digitalRead8 (int pin)
 {
   struct wiringPiNodeStruct *node = wiringPiNodes ;
 
-  if ((pin & PI_GPIO_MASK) == 0)		// On-Board Pin
+  if ((pin & PI_GPIO_MASK) == 0 || is_armadillo())		// On-Board Pin
     return 0 ;
   else
   {
@@ -1657,7 +1663,7 @@ void digitalWrite (int pin, int value)
 {
   struct wiringPiNodeStruct *node = wiringPiNodes ;
 
-  if ((pin & PI_GPIO_MASK) == 0)		// On-Board Pin
+  if ((pin & PI_GPIO_MASK) == 0 || is_armadillo())		// On-Board Pin
   {
     /**/ if (wiringPiMode == WPI_MODE_GPIO_SYS)	// Sys mode
     {
@@ -1699,7 +1705,7 @@ void digitalWrite8 (int pin, int value)
 {
   struct wiringPiNodeStruct *node = wiringPiNodes ;
 
-  if ((pin & PI_GPIO_MASK) == 0)		// On-Board Pin
+  if ((pin & PI_GPIO_MASK) == 0 || is_armadillo())		// On-Board Pin
     return ;
   else
   {
@@ -1722,7 +1728,7 @@ void pwmWrite (int pin, int value)
 
   setupCheck ("pwmWrite") ;
 
-  if ((pin & PI_GPIO_MASK) == 0)		// On-Board Pin
+  if ((pin & PI_GPIO_MASK) == 0 || is_armadillo())		// On-Board Pin
   {
     /**/ if (wiringPiMode == WPI_MODE_PINS)
       pin = pinToGpio [pin] ;
@@ -2295,6 +2301,15 @@ int wiringPiSetup (void)
   if (wiringPiDebug)
     printf ("wiringPi: wiringPiSetup called\n") ;
 
+  (void)piGpioLayout();
+
+  if (is_armadillo())
+  {
+    wiringPiSetuped = FALSE;
+    wiringPiSetupSys();
+    return 0;
+  }
+
 // Get the board ID information. We're not really using the information here,
 //	but it will give us information like the GPIO layout scheme (2 variants
 //	on the older 26-pin Pi's) and the GPIO peripheral base address.
@@ -2444,6 +2459,11 @@ int wiringPiSetupGpio (void)
   if (wiringPiDebug)
     printf ("wiringPi: wiringPiSetupGpio called\n") ;
 
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL,
+		  "You can not run wiringPiSetupGpio, if you want setup on Armadillo board,\n\
+you can run wiringPiSetup or wiringPiSetupSys only.\n");
+
   wiringPiMode = WPI_MODE_GPIO ;
 
   return 0 ;
@@ -2465,6 +2485,11 @@ int wiringPiSetupPhys (void)
 
   if (wiringPiDebug)
     printf ("wiringPi: wiringPiSetupPhys called\n") ;
+
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL,
+		  "You can not run wiringPiSetupPhys, if you want setup on Armadillo board, \
+you can run wiringPiSetup or wiringPiSetupSys only.");
 
   wiringPiMode = WPI_MODE_PHYS ;
 
@@ -2514,7 +2539,7 @@ int wiringPiSetupSys (void)
 // Open and scan the directory, looking for exported GPIOs, and pre-open
 //	the 'value' interface to speed things up for later
 
-  for (pin = 0 ; pin < 64 ; ++pin)
+  for (pin = 0 ; pin < 159 ; ++pin)
   {
     sprintf (fName, "/sys/class/gpio/gpio%d/value", pin) ;
     sysFds [pin] = open (fName, O_RDWR) ;

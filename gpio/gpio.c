@@ -1459,7 +1459,10 @@ int main (int argc, char *argv [])
   else
   {
     wiringPiSetup () ;
-    wpMode = WPI_MODE_PINS ;
+    if (is_armadillo())
+      wpMode = WPI_MODE_GPIO_SYS ;
+    else
+      wpMode = WPI_MODE_PINS ;
   }
 
 // Check for -x argument to load in a new extension
