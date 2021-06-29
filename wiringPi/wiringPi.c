@@ -2295,6 +2295,15 @@ int wiringPiSetup (void)
   if (wiringPiDebug)
     printf ("wiringPi: wiringPiSetup called\n") ;
 
+  (void)piGpioLayout();
+
+  if (is_armadillo())
+  {
+    wiringPiSetuped = FALSE;
+    wiringPiSetupSys();
+    return 0;
+  }
+
 // Get the board ID information. We're not really using the information here,
 //	but it will give us information like the GPIO layout scheme (2 variants
 //	on the older 26-pin Pi's) and the GPIO peripheral base address.
@@ -2444,6 +2453,11 @@ int wiringPiSetupGpio (void)
   if (wiringPiDebug)
     printf ("wiringPi: wiringPiSetupGpio called\n") ;
 
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL,
+		  "You can not run wiringPiSetupGpio, if you want setup on Armadillo board,\n\
+you can run wiringPiSetup or wiringPiSetupSys only.\n");
+
   wiringPiMode = WPI_MODE_GPIO ;
 
   return 0 ;
@@ -2465,6 +2479,11 @@ int wiringPiSetupPhys (void)
 
   if (wiringPiDebug)
     printf ("wiringPi: wiringPiSetupPhys called\n") ;
+
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL,
+		  "You can not run wiringPiSetupPhys, if you want setup on Armadillo board, \
+you can run wiringPiSetup or wiringPiSetupSys only.");
 
   wiringPiMode = WPI_MODE_PHYS ;
 
