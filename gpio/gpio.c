@@ -395,7 +395,7 @@ static void doExports (UNU int argc, UNU char *argv [])
   char fName [128] ;
   char buf [16] ;
 
-  for (first = 0, i = 0 ; i < 64 ; ++i)	// Crude, but effective
+  for (first = 0, i = 0 ; i < 160 ; ++i)	// Crude, but effective
   {
 
 // Try to read the direction
@@ -695,7 +695,7 @@ void doUnexportall (char *progName)
   FILE *fd ;
   int pin ;
 
-  for (pin = 0 ; pin < 63 ; ++pin)
+  for (pin = 0 ; pin < 160 ; ++pin)
   {
     if ((fd = fopen ("/sys/class/gpio/unexport", "w")) == NULL)
     {
