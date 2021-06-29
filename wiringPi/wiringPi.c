@@ -219,7 +219,7 @@ volatile unsigned int *_wiringPiTimerIrqRaw ;
 
 static volatile unsigned int piGpioBase = 0 ;
 
-const char *piModelNames [21] =
+const char *piModelNames [22] =
 {
   "Model A",	//  0
   "Model B",	//  1
@@ -242,6 +242,7 @@ const char *piModelNames [21] =
   "Unknown18",	// 18
   "Pi 400",	// 19
   "CM4",	// 20
+  "Armadillo-640", //21
 } ;
 
 const char *piRevisionNames [16] =
@@ -271,7 +272,7 @@ const char *piMakerNames [16] =
   "Embest",	//	 2
   "Unknown",	//	 3
   "Embest",	//	 4
-  "Unknown05",	//	 5
+  "AtmarkTechno",//	 5
   "Unknown06",	//	 6
   "Unknown07",	//	 7
   "Unknown08",	//	 8
@@ -643,6 +644,7 @@ static uint8_t gpioToClkDiv [] =
          -1,        -1,        -1,        -1,        -1,        -1,        -1,        -1,	// 56 -> 63
 } ;
 
+int board_armadillo = NOT_ARMADILLO;
 
 /*
  * Functions
@@ -747,7 +749,9 @@ static void piGpioLayoutOops (const char *why)
 int piGpioLayout (void)
 {
   FILE *cpuFd ;
+  FILE *fd ;
   char line [120] ;
+  char name [80] ;
   char *c ;
   static int  gpioLayout = -1 ;
 
@@ -770,6 +774,17 @@ int piGpioLayout (void)
 
   if (wiringPiDebug)
     printf ("piGpioLayout: Hardware: %s\n", line) ;
+
+  if (strstr (line, "Freescale"))
+  {
+    if ((fd = fopen ("/proc/device-tree/model", "r")) != NULL)
+    {
+      fgets (name, 80, fd) ;
+      fclose (fd) ;
+    }
+    if (strstr(name, "Armadillo-640"))
+      board_armadillo = ARMADILLO_640 ;
+  }
 
 // See if it's BCM2708 or BCM2709 or the new BCM2835.
 
@@ -1086,6 +1101,12 @@ void piBoardId (int *model, int *rev, int *mem, int *maker, int *warranty)
     else if (strcmp (c, "001b") == 0) { *model = PI_MODEL_AP ; *rev = PI_VERSION_1_1 ; *mem = 0 ; *maker = PI_MAKER_EGOMAN  ; }
 
     else                              { *model = 0           ; *rev = 0              ; *mem =   0 ; *maker = 0 ;               }
+  }
+
+  switch (get_board_armadillo())
+  {
+  case NOT_ARMADILLO: break;
+  case ARMADILLO_640: *model = MODEL_ARMADILLO_640; *rev = ARMADILLO_VERSION; *mem = 1; *maker = MAKER_ATMARKTECHNO; break;
   }
 }
 
@@ -2504,4 +2525,14 @@ int wiringPiSetupSys (void)
   wiringPiMode = WPI_MODE_GPIO_SYS ;
 
   return 0 ;
+}
+
+int is_armadillo (void)
+{
+  return (board_armadillo != NOT_ARMADILLO);
+}
+
+int get_board_armadillo (void)
+{
+  return board_armadillo;
 }

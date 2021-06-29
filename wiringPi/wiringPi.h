@@ -105,18 +105,24 @@
 #define	PI_MODEL_4B 		17
 #define	PI_MODEL_400		19
 #define	PI_MODEL_CM4		20
+#define	MODEL_ARMADILLO_640	21
 
 #define	PI_VERSION_1		0
 #define	PI_VERSION_1_1		1
 #define	PI_VERSION_1_2		2
 #define	PI_VERSION_2		3
+#define	ARMADILLO_VERSION	0
 
 #define	PI_MAKER_SONY		0
 #define	PI_MAKER_EGOMAN		1
 #define	PI_MAKER_EMBEST		2
 #define	PI_MAKER_UNKNOWN	3
+#define	MAKER_ATMARKTECHNO	5
 
-extern const char *piModelNames    [21] ;
+#define NOT_ARMADILLO		-1
+#define ARMADILLO_640		0
+
+extern const char *piModelNames    [22] ;
 extern const char *piRevisionNames [16] ;
 extern const char *piMakerNames    [16] ;
 extern const int   piMemorySize    [ 8] ;
@@ -262,6 +268,8 @@ extern void         delayMicroseconds (unsigned int howLong) ;
 extern unsigned int millis            (void) ;
 extern unsigned int micros            (void) ;
 
+extern int          is_armadillo      (void) ;
+extern int          get_board_armadillo (void) ;
 #ifdef __cplusplus
 }
 #endif

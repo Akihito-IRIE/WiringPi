@@ -1274,7 +1274,7 @@ static void doVersion (char *argv [])
   printf ("\n") ;
   piBoardId (&model, &rev, &mem, &maker, &warranty) ;
 
-  printf ("Raspberry Pi Details:\n") ;
+  printf ("Board Details:\n") ;
   printf ("  Type: %s, Revision: %s, Memory: %dMB, Maker: %s %s\n", 
       piModelNames [model], piRevisionNames [rev], piMemorySize [mem], piMakerNames [maker], warranty ? "[Out of Warranty]" : "") ;
 
