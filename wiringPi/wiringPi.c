@@ -77,6 +77,8 @@
 #include "wiringPi.h"
 #include "../version.h"
 
+#include "armadillo.h"
+
 // Environment Variables
 
 #define	ENV_DEBUG	"WIRINGPI_DEBUG"
@@ -1462,7 +1464,29 @@ void pinMode (int pin, int mode)
 
   setupCheck ("pinMode") ;
 
-  if ((pin & PI_GPIO_MASK) == 0 || is_armadillo())		// On-board pin
+  if (is_armadillo())
+  {
+    if (sysFds [pin] != -1)
+    {
+      FILE *fd;
+      char fName[128];
+
+      sprintf (fName, "/sys/class/gpio/gpio%d/direction", pin);
+      if ((fd = fopen (fName, "w")) == NULL)
+        return (void) wiringPiFailure (WPI_FATAL, "pinMode: unable to open %s: %s\n", fName, strerror (errno)) ;
+
+      if (mode == INPUT)
+	fprintf (fd, "in\n");
+      else if (mode == OUTPUT)
+	fprintf (fd, "out\n");
+      else
+        return (void) wiringPiFailure (WPI_FATAL, "pinMode: Invalid mode: should be INPUT or OUTPUT in Armadillo board\n") ;
+
+      fclose(fd);
+    }
+    return;
+  }
+  if ((pin & PI_GPIO_MASK) == 0)		// On-board pin
   {
     /**/ if (wiringPiMode == WPI_MODE_PINS)
       pin = pinToGpio [pin] ;
@@ -1834,6 +1858,9 @@ void digitalWriteByte (const int value)
   int mask = 1 ;
   int pin ;
 
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL, "You can not run digitalWriteByte on Armadillo board.\n");
+
   /**/ if (wiringPiMode == WPI_MODE_GPIO_SYS)
   {
     for (pin = 0 ; pin < 8 ; ++pin)
@@ -1865,6 +1892,9 @@ unsigned int digitalReadByte (void)
   int pin, x ;
   uint32_t raw ;
   uint32_t data = 0 ;
+
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL, "You can not run digitalReadByte on Armadillo board.\n");
 
   /**/ if (wiringPiMode == WPI_MODE_GPIO_SYS)
   {
@@ -1902,6 +1932,9 @@ void digitalWriteByte2 (const int value)
   register int mask = 1 ;
   register int pin ;
 
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL, "You can not run digitalWriteByte2 on Armadillo board.\n");
+
   /**/ if (wiringPiMode == WPI_MODE_GPIO_SYS)
   {
     for (pin = 20 ; pin < 28 ; ++pin)
@@ -1922,6 +1955,9 @@ unsigned int digitalReadByte2 (void)
 {
   int pin, x ;
   uint32_t data = 0 ;
+
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL, "You can not run digitalReadByte2 on Armadillo board.\n");
 
   /**/ if (wiringPiMode == WPI_MODE_GPIO_SYS)
   {
@@ -2028,8 +2064,16 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
   char  c ;
   int   bcmGpioPin ;
 
-  if ((pin < 0) || (pin > 63))
-    return wiringPiFailure (WPI_FATAL, "wiringPiISR: pin must be 0-63 (%d)\n", pin) ;
+  if (is_armadillo())
+  {
+    if ((pin < 0) || (pin > 159))
+      return wiringPiFailure (WPI_FATAL, "wiringPiISR: pin must be 0-159 (%d)\n", pin) ;
+  }
+  else
+  {
+    if ((pin < 0) || (pin > 63))
+      return wiringPiFailure (WPI_FATAL, "wiringPiISR: pin must be 0-63 (%d)\n", pin) ;
+  }
 
   /**/ if (wiringPiMode == WPI_MODE_UNINITIALISED)
     return wiringPiFailure (WPI_FATAL, "wiringPiISR: wiringPi has not been initialised. Unable to continue.\n") ;
@@ -2525,15 +2569,23 @@ int wiringPiSetupSys (void)
   if (wiringPiDebug)
     printf ("wiringPi: wiringPiSetupSys called\n") ;
 
-  if (piGpioLayout () == 1)
+  if (is_armadillo())
   {
-     pinToGpio =  pinToGpioR1 ;
-    physToGpio = physToGpioR1 ;
+     pinToGpio =  pinToGpioArmadillo;
+    physToGpio = physToGpioArmadillo;
   }
   else
   {
-     pinToGpio =  pinToGpioR2 ;
-    physToGpio = physToGpioR2 ;
+    if (piGpioLayout () == 1)
+    {
+       pinToGpio =  pinToGpioR1 ;
+      physToGpio = physToGpioR1 ;
+    }
+    else
+    {
+       pinToGpio =  pinToGpioR2 ;
+      physToGpio = physToGpioR2 ;
+    }
   }
 
 // Open and scan the directory, looking for exported GPIOs, and pre-open
