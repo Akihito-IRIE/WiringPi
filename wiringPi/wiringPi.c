@@ -1462,7 +1462,29 @@ void pinMode (int pin, int mode)
 
   setupCheck ("pinMode") ;
 
-  if ((pin & PI_GPIO_MASK) == 0 || is_armadillo())		// On-board pin
+  if (is_armadillo())
+  {
+    if (sysFds [pin] != -1)
+    {
+      FILE *fd;
+      char fName[128];
+
+      sprintf (fName, "/sys/class/gpio/gpio%d/direction", pin);
+      if ((fd = fopen (fName, "w")) == NULL)
+        return (void) wiringPiFailure (WPI_FATAL, "pinMode: unable to open %s: %s\n", fName, strerror (errno)) ;
+
+      if (mode == INPUT)
+        fprintf (fd, "in\n");
+      else if (mode == OUTPUT)
+        fprintf (fd, "out\n");
+      else
+        return (void) wiringPiFailure (WPI_FATAL, "pinMode: Invalid mode: should be INPUT or OUTPUT in Armadillo board\n") ;
+
+      fclose(fd);
+    }
+    return;
+  }
+  if ((pin & PI_GPIO_MASK) == 0)		// On-board pin
   {
     /**/ if (wiringPiMode == WPI_MODE_PINS)
       pin = pinToGpio [pin] ;
