@@ -119,9 +119,6 @@
 #define	PI_MAKER_UNKNOWN	3
 #define	MAKER_ATMARKTECHNO	5
 
-#define NOT_ARMADILLO		-1
-#define ARMADILLO_640		0
-
 extern const char *piModelNames    [22] ;
 extern const char *piRevisionNames [16] ;
 extern const char *piMakerNames    [16] ;
@@ -268,10 +265,10 @@ extern void         delayMicroseconds (unsigned int howLong) ;
 extern unsigned int millis            (void) ;
 extern unsigned int micros            (void) ;
 
-extern int          is_armadillo      (void) ;
-extern int          get_board_armadillo (void) ;
 #ifdef __cplusplus
 }
 #endif
+
+#include "armadillo.h"
 
 #endif
