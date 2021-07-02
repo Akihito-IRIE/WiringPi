@@ -10,4 +10,9 @@
 extern int is_armadillo        (void) ;
 extern int get_board_armadillo (void) ;
 
+// Armadillo always has wiringPiMode=WPI_MODE_GPIO_SYS,
+// so it does not convert the physical pin number or wpi pin number to GPIO number.
+static int  pinToGpioArmadillo [64] = {-1} ;
+static int physToGpioArmadillo [64] = {-1} ;
+
 #endif

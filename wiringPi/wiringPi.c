@@ -2537,15 +2537,23 @@ int wiringPiSetupSys (void)
   if (wiringPiDebug)
     printf ("wiringPi: wiringPiSetupSys called\n") ;
 
-  if (piGpioLayout () == 1)
+  if (is_armadillo())
   {
-     pinToGpio =  pinToGpioR1 ;
-    physToGpio = physToGpioR1 ;
+     pinToGpio =  pinToGpioArmadillo;
+    physToGpio = physToGpioArmadillo;
   }
   else
   {
-     pinToGpio =  pinToGpioR2 ;
-    physToGpio = physToGpioR2 ;
+    if (piGpioLayout () == 1)
+    {
+       pinToGpio =  pinToGpioR1 ;
+      physToGpio = physToGpioR1 ;
+    }
+    else
+    {
+       pinToGpio =  pinToGpioR2 ;
+      physToGpio = physToGpioR2 ;
+    }
   }
 
 // Open and scan the directory, looking for exported GPIOs, and pre-open
