@@ -2040,8 +2040,16 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
   char  c ;
   int   bcmGpioPin ;
 
-  if ((pin < 0) || (pin > 63))
-    return wiringPiFailure (WPI_FATAL, "wiringPiISR: pin must be 0-63 (%d)\n", pin) ;
+  if (is_armadillo())
+  {
+    if ((pin < 0) || (pin > 159))
+      return wiringPiFailure (WPI_FATAL, "wiringPiISR: pin must be 0-159 (%d)\n", pin) ;
+  }
+  else
+  {
+    if ((pin < 0) || (pin > 63))
+      return wiringPiFailure (WPI_FATAL, "wiringPiISR: pin must be 0-63 (%d)\n", pin) ;
+  }
 
   /**/ if (wiringPiMode == WPI_MODE_UNINITIALISED)
     return wiringPiFailure (WPI_FATAL, "wiringPiISR: wiringPi has not been initialised. Unable to continue.\n") ;
