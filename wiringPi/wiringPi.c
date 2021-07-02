@@ -1834,6 +1834,9 @@ void digitalWriteByte (const int value)
   int mask = 1 ;
   int pin ;
 
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL, "You can not run digitalWriteByte on Armadillo board.\n");
+
   /**/ if (wiringPiMode == WPI_MODE_GPIO_SYS)
   {
     for (pin = 0 ; pin < 8 ; ++pin)
@@ -1865,6 +1868,9 @@ unsigned int digitalReadByte (void)
   int pin, x ;
   uint32_t raw ;
   uint32_t data = 0 ;
+
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL, "You can not run digitalReadByte on Armadillo board.\n");
 
   /**/ if (wiringPiMode == WPI_MODE_GPIO_SYS)
   {
@@ -1902,6 +1908,9 @@ void digitalWriteByte2 (const int value)
   register int mask = 1 ;
   register int pin ;
 
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL, "You can not run digitalWriteByte2 on Armadillo board.\n");
+
   /**/ if (wiringPiMode == WPI_MODE_GPIO_SYS)
   {
     for (pin = 20 ; pin < 28 ; ++pin)
@@ -1922,6 +1931,9 @@ unsigned int digitalReadByte2 (void)
 {
   int pin, x ;
   uint32_t data = 0 ;
+
+  if (is_armadillo())
+    wiringPiFailure(WPI_FATAL, "You can not run digitalReadByte2 on Armadillo board.\n");
 
   /**/ if (wiringPiMode == WPI_MODE_GPIO_SYS)
   {
